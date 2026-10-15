@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Talent ou chance ?</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1120;--panel:#161a2d;--panel2:#1d2240;--ink:#eef0fa;--muted:#9aa1c2;--line:#2a3056;
+  --luck:#3ddc97;--bad:#ff5d73;--gold:#ffc94d;--accent:#8b98ff;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.5}
+body{background:radial-gradient(1200px 600px at 10% -10%,#252c5c 0%,transparent 60%),radial-gradient(900px 500px at 110% 10%,#3a2346 0%,transparent 55%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.grid>div{min-width:0}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1{font-family:Fraunces,Georgia,serif;font-weight:900;font-size:clamp(2.2rem,7vw,4rem);line-height:1.02;margin:10px 0 8px;letter-spacing:-.02em}
+h1 .g{color:var(--luck)}h1 .r{color:var(--bad)}
+h2{font-family:Fraunces,Georgia,serif;font-size:1.35rem;margin:0 0 10px}
+h3{font-size:.95rem;margin:0 0 8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.lead{color:#c9cdea;font-size:1.08rem;max-width:720px;margin:0 0 18px}
+.card{background:linear-gradient(180deg,var(--panel),#13172a);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.grid{display:grid;gap:16px}
+@media(min-width:920px){.grid{grid-template-columns:1.05fr 1fr}}
+details{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 16px;margin-bottom:16px}
+summary{cursor:pointer;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"▸ ";color:var(--accent)}
+details[open] summary::before{content:"▾ "}
+ul{padding-left:20px;margin:8px 0}li{margin:4px 0}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:12px;padding:10px 14px;font:600 .95rem Inter,sans-serif;cursor:pointer;transition:transform .08s,background .2s}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:linear-gradient(135deg,#6f7dff,#a35bff);border-color:transparent}
+.btn.ghost{background:transparent}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,input[type=number]{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:500 .95rem Inter,sans-serif}
+input[type=number]{width:96px}
+.worldbox{position:relative;width:100%}
+canvas{display:block;width:100%}
+#world{border-radius:14px;background:#0a0d19;touch-action:manipulation;cursor:crosshair}
+.yearbar{display:flex;justify-content:space-between;align-items:baseline;margin:10px 0 6px}
+.year{font-family:Fraunces,serif;font-size:1.7rem;font-weight:900}
+.track{height:6px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.track>div{height:100%;width:0;background:linear-gradient(90deg,var(--luck),var(--gold),var(--bad))}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:.86rem;color:var(--muted)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--panel2);border-radius:14px;padding:12px}
+.stat .v{font-family:Fraunces,serif;font-size:1.6rem;font-weight:900;line-height:1.1}
+.stat .l{font-size:.82rem;color:var(--muted)}
+.chartbox{background:var(--panel2);border-radius:14px;padding:10px;margin-top:12px}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.78rem;font-weight:600}
+.tag.L{background:rgba(61,220,151,.15);color:var(--luck)}
+.tag.M{background:rgba(154,161,194,.15);color:var(--muted)}
+.tag.B{background:rgba(255,93,115,.15);color:var(--bad)}
+.hist{max-height:220px;overflow:auto;margin-top:8px;padding-right:4px}
+.hist div{display:flex;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.params{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:10px 0}
+.param{background:var(--panel2);border-radius:12px;padding:10px}
+.param label{display:block;font-weight:600;font-size:.9rem}
+.param .hint{font-size:.78rem;color:var(--muted);margin-top:4px}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:.92rem}
+.progress{height:8px;background:var(--panel2);border-radius:8px;overflow:hidden;margin:10px 0}
+.progress>div{height:100%;width:0;background:var(--accent);transition:width .1s}
+.res{display:grid;gap:8px;margin-top:8px}
+.res div{background:var(--panel2);border-radius:12px;padding:10px 12px}
+.res b{font-family:Fraunces,serif;font-size:1.25rem}
+a{color:var(--accent)}
+footer{color:var(--muted);font-size:.86rem;margin-top:24px}
+.bets{display:grid;gap:12px}
+@media(min-width:920px){.bets{grid-template-columns:repeat(3,1fr)}}
+.bet{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;min-width:0}
+.bet .q{font-weight:600;margin:0 0 6px}
+.opt{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid var(--line);cursor:pointer;margin-top:6px;font-size:.92rem}
+.opt input{accent-color:var(--accent);margin:0}
+.opt:has(input:checked){border-color:var(--accent);background:rgba(139,152,255,.12)}
+.opt.truth{border-color:var(--luck);background:rgba(61,220,151,.12)}
+.verdict{margin-top:10px;font-size:.9rem;padding:8px 10px;border-radius:10px;background:var(--bg)}
+.verdict .ok{color:var(--luck);font-weight:700}.verdict .ko{color:var(--bad);font-weight:700}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px;border-bottom:1px solid var(--line)}
+.tab{appearance:none;background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);font:600 .98rem Inter,sans-serif;padding:10px 4px;margin-right:14px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tblwrap{overflow-x:auto;margin:8px 0}
+table.src{border-collapse:collapse;width:100%;min-width:640px;font-size:.88rem}
+table.src th,table.src td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.src th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+table.src td.lv{white-space:nowrap}
+.lvl{display:inline-block;border-radius:999px;padding:1px 8px;font-size:.76rem;font-weight:700}
+.lvl.m{background:rgba(255,201,77,.15);color:var(--gold)}.lvl.g{background:rgba(255,93,115,.15);color:var(--bad)}
+.calc{color:var(--muted);font-size:.8rem}
+.note{background:var(--panel2);border-radius:12px;padding:10px 12px;font-size:.9rem;margin:10px 0}
+.badge{display:inline-block;background:rgba(139,152,255,.15);color:var(--accent);border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<span class="badge">V1 · fidèle au modèle italien</span>
+<h1>Talent ou <span class="g">chan</span><span class="r">ce</span> ?</h1>
+<p class="lead">1 000 personnes, 40 ans de vie active. Des coups de chance et des coups durs se promènent au hasard. Regardez ce qui se passe, puis jugez par vous-même.</p>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="tabBtnSim" aria-selected="true" aria-controls="tabSim">La simulation</button>
+  <button class="tab" role="tab" id="tabBtnSrc" aria-selected="false" aria-controls="tabSrc">D'où viennent les chiffres</button>
+</div>
+<div id="tabSim" role="tabpanel">
+
+<div class="card" style="border-color:var(--accent)">
+  <h2>Ce qu'on cherche à savoir</h2>
+  <p style="margin:0 0 8px">Quand quelqu'un réussit très bien, est-ce surtout grâce à son talent, ou surtout grâce à la chance ? Cette simulation reprend un modèle de chercheurs italiens (2018) pour tester la question avec des règles simples et visibles.</p>
+  <p class="small muted" style="margin:0 0 4px">Gardez ces questions en tête pendant que ça tourne :</p>
+  <ul>
+    <li>Si vous ne regardiez que les plus riches, que diriez-vous de leur talent ?</li>
+    <li>Que se passe-t-il quand on enlève la chance ? Et quand tout le monde a le même talent ?</li>
+    <li>Ce monde ressemble-t-il au vrai ? En quoi pas du tout ?</li>
+  </ul>
+  <p class="small muted" style="margin-bottom:0">Pas de bonne réponse imposée. Le modèle est volontairement simple : à vous de voir ce qu'il éclaire, et ce qu'il laisse dans l'ombre.</p>
+</div>
+
+<div class="card" id="pari">
+  <h2>Votre pari avant de lancer</h2>
+  <p class="small muted" style="margin-top:0">Trois réponses, à l'instinct. On les compare ensuite aux résultats de 100 mondes.</p>
+  <div class="bets" id="bets"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn primary" id="checkBet">Vérifier mon pari sur 100 mondes</button>
+    <span class="small muted" id="betNote"></span>
+  </div>
+  <p class="small muted" id="betWarn" hidden style="margin:10px 0 0">Ce sont les résultats de ce modèle, avec ses règles simplifiées, pas une mesure du monde réel. Changez une règle plus bas et les chiffres bougent.</p>
+</div>
+
+<details>
+<summary>Les règles du jeu (celles du papier de 2018)</summary>
+<ul>
+  <li>1 000 personnes immobiles, placées au hasard sur un carré de 201 × 201 cases.</li>
+  <li>Chacune reçoit un <b>talent</b> entre 0 et 1, tiré en courbe en cloche : moyenne 0,6, écart type 0,1. Il ne change jamais.</li>
+  <li>Tout le monde part avec le <b>même capital : 10</b>.</li>
+  <li>500 événements bougent au hasard : moitié <span style="color:var(--luck)">coups de chance</span>, moitié <span style="color:var(--bad)">coups durs</span>.</li>
+  <li>Tous les 6 mois, pendant 40 ans (80 tours), chaque événement se déplace. S'il passe à moins d'une case d'une personne :
+    <ul>
+      <li>coup dur : son capital est <b>divisé par 2</b> ;</li>
+      <li>coup de chance : elle a une probabilité égale à son talent de le saisir (talent 0,7 = 70 % de chances). Si elle le saisit, son capital <b>double</b>. Sinon, rien.</li>
+    </ul>
+  </li>
+  <li>Dans ce modèle, le talent sert à une seule chose : saisir les occasions.</li>
+</ul>
+<p class="small muted">Source : A. Pluchino, A. E. Biondo, A. Rapisarda, « Talent vs Luck: the role of randomness in success and failure », Advances in Complex Systems, 2018 (<a href="https://arxiv.org/abs/1802.07068" target="_blank" rel="noopener">arXiv 1802.07068</a>). Deux réglages ne sont pas précisés dans le papier : la distance parcourue par tour (ici 2 cases) et la portée d'une rencontre (ici 1 case). La portée a été choisie pour retrouver les résultats publiés : les 20 % les plus riches détiennent environ 80 % du capital, la personne la plus riche finit vers 2 560. Les deux sont réglables plus bas.</p>
+</details>
+
+<div class="grid">
+  <!-- Monde -->
+  <div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h2 style="margin:0">Le monde</h2>
+        <span class="small muted">Touchez un point pour suivre une personne</span>
+      </div>
+      <div class="yearbar"><div class="year" id="year">Année 0</div><div class="small muted" id="counters"></div></div>
+      <div class="track"><div id="trackfill"></div></div>
+      <div class="worldbox" style="margin-top:12px"><canvas id="world"></canvas></div>
+      <div class="legend">
+        <span><span class="dot" style="background:var(--luck)"></span>coup de chance</span>
+        <span><span class="dot" style="background:var(--bad)"></span>coup dur</span>
+        <span><span class="dot" style="background:#8a91b8"></span>capital de départ</span>
+        <span><span class="dot" style="background:var(--gold)"></span>plus riche</span>
+        <span><span class="dot" style="background:#3a3f63"></span>plus pauvre</span>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn primary" id="play">▶ Lancer</button>
+        <button class="btn" id="stepBtn">+6 mois</button>
+        <button class="btn" id="finishBtn">Aller à la fin</button>
+        <button class="btn ghost" id="resetBtn">↺ Recommencer</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label class="small muted">Vitesse</label>
+        <select id="speed">
+          <option value="900">Lente</option>
+          <option value="420" selected>Normale</option>
+          <option value="140">Rapide</option>
+          <option value="25">Éclair</option>
+        </select>
+        <label class="small muted" style="margin-left:6px">Monde n°</label>
+        <input type="number" id="seed" min="1" step="1">
+        <button class="btn ghost" id="dice" title="Autre monde">🎲</button>
+      </div>
+      <p class="small muted" style="margin:8px 0 0">Le même numéro de monde donne toujours exactement la même histoire. Pratique pour comparer en changeant une seule règle.</p>
+    </div>
+
+    <div class="card">
+      <h2>Suivre une personne</h2>
+      <div class="row">
+        <button class="btn" id="pickRich">La plus riche</button>
+        <button class="btn" id="pickTal">La plus talentueuse</button>
+        <button class="btn" id="pickPoor">La plus pauvre</button>
+        <button class="btn ghost" id="pickRand">Au hasard</button>
+      </div>
+      <div id="follow" style="margin-top:12px" class="muted">Personne sélectionnée.</div>
+    </div>
+  </div>
+
+  <!-- Résultats -->
+  <div>
+    <div class="card">
+      <h2>Ce qui se passe</h2>
+      <p class="small muted" id="startHint" style="margin:0 0 10px">Lancez la simulation pour voir les chiffres apparaître. Au départ, tout le monde a le même capital.</p>
+      <div class="stats">
+        <div class="stat"><div class="v" id="sTop20">20 %</div><div class="l">du capital total détenu par les 20 % les plus riches</div></div>
+        <div class="stat"><div class="v" id="sBot50">50 %</div><div class="l">du capital total détenu par la moitié la plus pauvre</div></div>
+        <div class="stat"><div class="v" id="sUpDown">0 / 0</div><div class="l">plus riches qu'au départ / plus pauvres</div></div>
+        <div class="stat"><div class="v" id="sRich">10</div><div class="l" id="sRichL">capital de la personne la plus riche</div></div>
+      </div>
+      <div class="chartbox">
+        <h3>Talent et capital</h3>
+        <canvas id="scatter"></canvas>
+        <p class="small muted" style="margin:6px 0 0">Chaque point est une personne. À droite les plus talentueux, en haut les plus riches. L'échelle monte par doublements.</p>
+      </div>
+      <div class="chartbox">
+        <h3>Combien de personnes à chaque niveau</h3>
+        <canvas id="bars"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Répéter l'expérience</h2>
+  <p class="muted" style="margin-top:0">Un seul monde peut être un hasard. Ici on fait tourner 100 mondes différents avec les mêmes règles, sans animation, et on regarde les moyennes.</p>
+  <button class="btn primary" id="batchBtn">Lancer 100 mondes</button>
+  <div class="progress"><div id="batchFill"></div></div>
+  <div class="res" id="batchRes"></div>
+</div>
+
+<details id="paramBox">
+<summary>Changer les règles (pour isoler un facteur)</summary>
+<p class="small muted">Par défaut, tout est réglé comme dans le papier. Changez une seule chose à la fois, gardez le même numéro de monde, et comparez.</p>
+<div class="params">
+  <div class="param"><label>Nombre de personnes</label><input type="number" id="pN" min="50" max="5000" step="50"><div class="hint">Papier : 1 000</div></div>
+  <div class="param"><label>Talent moyen</label><input type="number" id="pmT" min="0" max="1" step="0.05"><div class="hint">Papier : 0,6</div></div>
+  <div class="param"><label>Écart de talent entre les gens</label><input type="number" id="psT" min="0" max="0.5" step="0.01"><div class="hint">Papier : 0,1 (écart type)</div></div>
+  <div class="param"><label>Capital de départ</label><input type="number" id="pC0" min="1" step="1"><div class="hint">Papier : 10. Ne change que l'échelle.</div></div>
+  <div class="param"><label>Nombre d'événements</label><input type="number" id="pNE" min="0" max="5000" step="50"><div class="hint">Papier : 500</div></div>
+  <div class="param"><label>Part de coups de chance (%)</label><input type="number" id="ppL" min="0" max="100" step="5"><div class="hint">Papier : 50 %</div></div>
+  <div class="param"><label>Durée (années)</label><input type="number" id="pY" min="1" max="80" step="1"><div class="hint">Papier : 40 ans, un tour tous les 6 mois</div></div>
+  <div class="param"><label>Déplacement par tour (cases)</label><input type="number" id="pMv" min="0.5" max="20" step="0.5"><div class="hint">Non précisé dans le papier. Choix : 2</div></div>
+  <div class="param"><label>Portée d'une rencontre (cases)</label><input type="number" id="pRe" min="0.5" max="5" step="0.5"><div class="hint">Non précisée dans le papier. 1 case retrouve ses résultats (80/20, plus riche vers 2 560)</div></div>
+</div>
+<div class="grid" style="gap:8px">
+  <label class="chk"><input type="checkbox" id="pLuck"> <span><b>Coups de chance actifs</b><br><span class="small muted">Décochez pour voir un monde sans chance (les coups durs restent).</span></span></label>
+  <label class="chk"><input type="checkbox" id="pBad"> <span><b>Coups durs actifs</b><br><span class="small muted">Décochez pour voir un monde sans malchance.</span></span></label>
+  <label class="chk"><input type="checkbox" id="pSame"> <span><b>Même talent pour tout le monde</b><br><span class="small muted">Tout le monde reçoit le talent moyen. Seule la chance fait la différence.</span></span></label>
+</div>
+<div class="row" style="margin-top:12px">
+  <button class="btn primary" id="applyBtn">Appliquer et recommencer</button>
+  <button class="btn ghost" id="defBtn">Revenir aux règles du papier</button>
+  <span class="small muted" id="paramNote"></span>
+</div>
+</details>
+
+<details>
+<summary>Ce que ce modèle ne dit pas</summary>
+<ul>
+  <li>Le talent est réduit à un seul chiffre, fixe toute la vie.</li>
+  <li>Tout le monde part avec le même capital : pas d'héritage, pas de milieu d'origine.</li>
+  <li>Un coup dur frappe pareil un riche et un pauvre (une division par 2). Pas de seuil, pas de crédit, pas de charge mentale.</li>
+  <li>Personne ne bouge, ne s'entraide, ne se relève.</li>
+  <li>Le talent n'aide pas à éviter les coups durs, seulement à saisir les occasions.</li>
+</ul>
+<p class="small muted">Ces limites sont les pistes de la suite : coups durs par niveaux, charge mentale, entourage, capacité à se relever.</p>
+</details>
+
+
+</div>
+
+<div id="tabSrc" role="tabpanel" hidden>
+
+<div class="card">
+  <h2>Les règles de cette simulation</h2>
+  <p style="margin-top:0">Cette version reprend le modèle publié par trois chercheurs italiens : A. Pluchino, A. E. Biondo et A. Rapisarda, « Talent vs Luck: the role of randomness in success and failure », <i>Advances in Complex Systems</i>, 2018 (<a href="https://arxiv.org/abs/1802.07068" target="_blank" rel="noopener">lire l'article</a>).</p>
+  <div class="tblwrap"><table class="src">
+    <thead><tr><th>Règle</th><th>Valeur</th><th>Origine</th></tr></thead>
+    <tbody>
+      <tr><td>Nombre de personnes</td><td>1 000</td><td>Article</td></tr>
+      <tr><td>Talent</td><td>Courbe en cloche, moyenne 0,6, écart type 0,1</td><td>Article</td></tr>
+      <tr><td>Capital de départ</td><td>10 pour tout le monde</td><td>Article</td></tr>
+      <tr><td>Événements</td><td>500, moitié chance, moitié coups durs</td><td>Article</td></tr>
+      <tr><td>Durée</td><td>40 ans, un tour tous les 6 mois</td><td>Article</td></tr>
+      <tr><td>Effets</td><td>Coup dur : capital ÷ 2. Chance saisie : capital × 2. Chance saisie avec une probabilité égale au talent</td><td>Article</td></tr>
+      <tr><td>Déplacement des événements</td><td>2 cases par tour</td><td><b>Notre choix.</b> L'article ne le précise pas</td></tr>
+      <tr><td>Portée d'une rencontre</td><td>1 case</td><td><b>Notre choix.</b> L'article ne le précise pas. Réglée pour retrouver ses résultats : les 20 % les plus riches détiennent environ 80 % du capital, la personne la plus riche finit vers 2 560</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Les chiffres du pari et des 100 mondes sont produits par ces règles. Ce sont les résultats de ce modèle simplifié, pas une mesure du monde réel.</p>
+</div>
+
+<div class="card">
+  <h2>Les vrais chiffres réunis pour la suite</h2>
+  <p style="margin-top:0"><b>Pas encore dans la simulation.</b> Pour la prochaine version, on veut remplacer les coups durs abstraits par de vrais coups durs, avec leurs fréquences en France, et comparer un monde avec et sans protection sociale. Voici les données retenues. Fréquences par an.</p>
+  <div class="tblwrap"><table class="src">
+    <thead><tr><th>Niveau</th><th>Coup dur</th><th>Fréquence</th><th>Sans protection</th><th>Avec protection (France)</th><th>Sources</th></tr></thead>
+    <tbody>
+      <tr><td class="lv"><span class="lvl m">Moyen</span></td><td>Perte d'emploi</td><td>2,8 % des personnes en emploi (CDD 10,6 %, CDI 1,7 %), 2023-2024</td><td>Perte de tout le salaire</td><td>Allocation moyenne de 1 048 € net par mois. Environ 68 % des inscrits indemnisés <span class="calc">(calcul)</span></td><td><a href="https://www.insee.fr/fr/statistiques/8376848" target="_blank" rel="noopener">INSEE</a>, <a href="https://www.unedic.org/publications/les-indicateurs-de-l-assurance-chomage-mars-2026" target="_blank" rel="noopener">Unédic</a></td></tr>
+      <tr><td class="lv"><span class="lvl m">Moyen</span></td><td>Séparation</td><td>Environ 425 000 par an pour environ 15 millions de couples, soit environ 2,8 % <span class="calc">(calcul)</span>. 44 divorces pour 100 mariages (2014)</td><td colspan="2">Niveau de vie après la rupture, aides comprises : environ −20 % pour les femmes, −3 % pour les hommes (données 2008-2010)</td><td><a href="https://drees.solidarites-sante.gouv.fr/sources-outils-et-enquetes/les-ruptures-familiales-les-separations-et-les-familles-separees" target="_blank" rel="noopener">DREES</a>, <a href="https://www.insee.fr/fr/statistiques/8612510" target="_blank" rel="noopener">INSEE</a>, <a href="https://www.insee.fr/fr/statistiques/fichier/2121566/ip1599.pdf" target="_blank" rel="noopener">INSEE</a>, <a href="https://www.insee.fr/fr/statistiques/2017508" target="_blank" rel="noopener">INSEE</a></td></tr>
+      <tr><td class="lv"><span class="lvl m">Moyen</span></td><td>Accident de la vie courante</td><td>17,8 % de la population, dont la moitié consulte un soignant (2012)</td><td>Soins à payer</td><td>Soins remboursés</td><td><a href="https://cardiologie.lequotidiendumedecin.fr/actus-medicales/sante-publique/toujours-aussi-nombreux-les-accidents-de-la-vie-courante-touchent-11-millions-de-francais" target="_blank" rel="noopener">Santé publique France (ESPS 2012)</a></td></tr>
+      <tr><td class="lv"><span class="lvl g">Grave</span></td><td>Cancer</td><td>433 000 nouveaux cas en 2023, soit environ 0,6 % <span class="calc">(calcul)</span></td><td>Soins : de l'ordre de 16 000 € par an et par malade <span class="calc">(calcul, régime agricole seulement)</span>. 1 personne en emploi sur 5 ne travaille plus 5 ans après</td><td>Soins pris en charge à 100 %. Il reste en moyenne 840 € par an à payer (toutes maladies longues)</td><td><a href="https://www.santepubliquefrance.fr/cancers" target="_blank" rel="noopener">Santé publique France</a>, <a href="https://statistiques.msa.fr/wp-content/uploads/2025/11/SY-Cartographie-des-pathologies-2023-3.pdf" target="_blank" rel="noopener">MSA</a>, <a href="https://presse.inserm.fr/en/five-years-after-a-cancer-diagnosis-quality-of-life-and-employment-status-remain-strongly-impacted/58347/" target="_blank" rel="noopener">Inserm</a>, <a href="https://www.jechange.fr/assurance/mutuelle-sante/news/ald-affections-longue-duree-deux-tiers-depenses-secu" target="_blank" rel="noopener">JeChange</a></td></tr>
+      <tr><td class="lv"><span class="lvl g">Grave</span></td><td>Invalidité</td><td>105 000 nouvelles pensions d'invalidité en 2022, soit environ 0,35 % des actifs <span class="calc">(calcul)</span></td><td>Perte du salaire</td><td>Pension moyenne de 840 € brut par mois</td><td><a href="https://www.drees.solidarites-sante.gouv.fr/sites/default/files/2024-10/RR24%20-%20Fiche%2024%20-%20Le%20profil%20des%20b%C3%A9n%C3%A9ficiaires%20d%E2%80%99une%20pension%20d%E2%80%99invalidit%C3%A9.pdf" target="_blank" rel="noopener">DREES</a></td></tr>
+      <tr><td class="lv"><span class="lvl g">Grave</span></td><td>Perte d'un parent avant 18 ans</td><td>Environ 250 000 mineurs orphelins en 2015, soit environ 1,7 % des mineurs <span class="calc">(calcul, nombre à un instant donné)</span></td><td>L'écart de niveau de vie vient surtout du passage à un seul parent</td><td>Allocation de soutien familial : 200,78 € par mois et par enfant (2026). Pension d'orphelin selon le régime du parent</td><td><a href="https://www.ined.fr/fichier/s_rubrique/30361/cp_pop_et_soc_580_aout2020_web_vf.fr.pdf" target="_blank" rel="noopener">INED</a>, <a href="https://www.aide-sociale.fr/allocation-soutien-familial/" target="_blank" rel="noopener">Aide-sociale.fr</a>, <a href="https://www.previssima.fr/question-pratique/puis-je-percevoir-une-pension-dorphelin.html" target="_blank" rel="noopener">Previssima</a></td></tr>
+    </tbody>
+  </table></div>
+  <h3 style="margin-top:16px">Ce que coûte la protection</h3>
+  <ul>
+    <li>Prestations sociales : 932 milliards d'euros en 2024, soit 31,9 % du PIB (27,3 % en moyenne dans l'UE) (<a href="https://drees.solidarites-sante.gouv.fr/publications-communique-de-presse/panoramas-de-la-drees/251217-protection-sociale-france-europe-2024" target="_blank" rel="noopener">DREES</a>).</li>
+    <li>Sur un salaire du privé : environ 21 % de cotisations salariales et 41 % de cotisations patronales, presque entièrement allégées au niveau du SMIC (<a href="https://www.weblex.fr/chiffres-cles/cotisations-sociales-des-salaries-annee-2026" target="_blank" rel="noopener">Weblex</a>).</li>
+    <li>Sur les gains de placements : 18,6 % depuis 2026, 17,2 % sur l'assurance vie et l'immobilier. Livret A, LDDS et LEP exonérés (<a href="https://www.lafinancepourtous.com/pratique/impots/l-impot-sur-le-revenu/comprendre-le-jargon-des-impots/les-prelevements-sociaux-2" target="_blank" rel="noopener">La finance pour tous</a>).</li>
+  </ul>
+  <h3 style="margin-top:16px">Le chiffre qui servira de contrôle</h3>
+  <p style="margin-top:0">Avant impôts et aides, les 10 % les plus aisés ont 21 fois plus que les 10 % les plus modestes. Après, 6 fois (2024, <a href="https://www.insee.fr/fr/statistiques/8612544" target="_blank" rel="noopener">INSEE</a>). Ce chiffre ne sert pas à régler le modèle : il sert à le vérifier. Si le monde « avec protection » s'en éloigne beaucoup, le modèle est faux quelque part.</p>
+  <h3 style="margin-top:16px">Ce qu'on a écarté, et pourquoi</h3>
+  <ul>
+    <li><b>Dépense imprévue :</b> la seule fréquence trouvée vient d'une enquête de 2016 commandée par un organisme de crédit. Pas assez fiable.</li>
+    <li><b>Surendettement :</b> environ 135 000 dossiers en 2024 (<a href="https://www.banque-france.fr/fr/actualites/le-surendettement-des-menages-enquete-typologique-2024" target="_blank" rel="noopener">Banque de France</a>). Ce n'est pas un coup dur indépendant : il arrive souvent quand deux coups durs s'additionnent. Il sera traité comme une conséquence, pas tiré au hasard.</li>
+    <li><b>Impact humain d'un cancer ou d'un deuil :</b> moral, famille, entourage. Réel et lourd, mais on ne sait pas le mesurer honnêtement en un chiffre. Seul le volet financier est retenu.</li>
+  </ul>
+  <p class="small muted" style="margin-bottom:0">« Calcul » signale un chiffre que nous avons obtenu en divisant deux chiffres officiels. Données consultées en octobre 2026.</p>
+</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h2>La suite, avec vous</h2>
+  <p style="margin-top:0">Cet outil est construit avec une vision, la mienne. Avec la vôtre, il sera bien meilleur.</p>
+  <p style="margin-bottom:0">Une erreur, une source plus fiable, une idée de coup dur ou de règle à tester, un passage pas clair : <a href="https://github.com/unsern15/talent-ou-chance/issues" target="_blank" rel="noopener">dites-le ici</a> <span class="small muted">(compte GitHub gratuit)</span>. Bientôt : un vote pour choisir le prochain facteur à ajouter.</p>
+</div>
+
+<footer>
+  Modèle : Pluchino, Biondo, Rapisarda (2018). Inspiration du format : les simulations jouables de Nicky Case. V1, octobre 2026.
+</footer>
+</div>
+
+<script>
+(function(){
+const W=201;
+const DEF={N:1000,mT:0.6,sT:0.1,C0:10,NE:500,pL:50,years:40,move:2,reach:1,luckOn:true,badOn:true,sameTalent:false};
+let P=Object.assign({},DEF);
+
+/* ---------- Hasard reproductible ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function gauss(r){let u=0;while(u===0)u=r();const v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+
+/* ---------- Le modèle ---------- */
+function createSim(p,seed){
+  const r=mulberry32(seed);
+  const grid=new Int32Array(W*W).fill(-1);
+  const N=Math.min(p.N,5000);
+  const ag=[];
+  for(let i=0;i<N;i++){
+    let x,y;do{x=Math.floor(r()*W);y=Math.floor(r()*W)}while(grid[y*W+x]!==-1);
+    grid[y*W+x]=i;
+    let T=p.sameTalent?p.mT:p.mT+p.sT*gauss(r);
+    T=Math.min(1,Math.max(0,T));
+    ag.push({x,y,T,C:p.C0,k:0,hist:[],nL:0,nLc:0,nB:0});
+  }
+  const nL=p.luckOn?Math.round(p.NE*p.pL/100):0;
+  const nB=p.badOn?p.NE-Math.round(p.NE*p.pL/100):0;
+  const ev=[];
+  for(let i=0;i<nL+nB;i++){const x=r()*W,y=r()*W;ev.push({x,y,px:x,py:y,good:i<nL})}
+  const order=ag.map((a,i)=>i).sort((a,b)=>ag[b].T-ag[a].T);
+  order.forEach((idx,rk)=>ag[idx].tr=rk+1);
+  const off=[],Ri=Math.ceil(p.reach);
+  for(let dy=-Ri;dy<=Ri;dy++)for(let dx=-Ri;dx<=Ri;dx++)off.push([dx,dy]);
+  return {p,seed,r,grid,ag,ev,off,step:0,steps:Math.round(p.years*2),hits:[],cL:0,cLc:0,cB:0};
+}
+function stepSim(s){
+  if(s.step>=s.steps)return false;
+  const r=s.r,p=s.p;s.hits=[];
+  for(const e of s.ev){
+    e.px=e.x;e.py=e.y;
+    const a=r()*Math.PI*2;
+    e.x=((e.x+Math.cos(a)*p.move)%W+W)%W;
+    e.y=((e.y+Math.sin(a)*p.move)%W+W)%W;
+    const cx=Math.floor(e.x),cy=Math.floor(e.y);
+    for(const o of s.off){
+      const gx=(cx+o[0]+W)%W,gy=(cy+o[1]+W)%W;
+      const idx=s.grid[gy*W+gx];
+      if(idx<0)continue;
+      let ddx=Math.abs(gx+.5-e.x);if(ddx>W/2)ddx=W-ddx;
+      let ddy=Math.abs(gy+.5-e.y);if(ddy>W/2)ddy=W-ddy;
+      if(ddx*ddx+ddy*ddy>p.reach*p.reach)continue;
+      const g=s.ag[idx];
+      if(e.good){
+        g.nL++;s.cL++;
+        if(r()<g.T){g.C*=2;g.k++;g.nLc++;s.cLc++;g.hist.push([s.step+1,'L',g.C])}
+        else g.hist.push([s.step+1,'M',g.C]);
+      }else{g.C/=2;g.k--;g.nB++;s.cB++;g.hist.push([s.step+1,'B',g.C])}
+      s.hits.push({idx,good:e.good});
+    }
+  }
+  s.step++;return true;
+}
+function stats(s){
+  const ag=s.ag,n=ag.length;
+  const C=ag.map(a=>a.C).sort((a,b)=>b-a);
+  const tot=C.reduce((x,y)=>x+y,0)||1;
+  let t20=0;for(let i=0;i<Math.round(n*0.2);i++)t20+=C[i];
+  let b50=0;for(let i=n-Math.round(n*0.5);i<n;i++)b50+=C[i];
+  let up=0,down=0,rich=0,poor=0,tal=0,richTies=0;
+  for(let i=0;i<n;i++){
+    const a=ag[i];
+    if(a.k>0)up++;else if(a.k<0)down++;
+    if(a.C>ag[rich].C)rich=i;
+    if(a.C<ag[poor].C)poor=i;
+    if(a.T>ag[tal].T)tal=i;
+  }
+  for(const a of ag)if(a.C===ag[rich].C)richTies++;
+  return {top20:t20/tot,bot50:b50/tot,up,down,same:n-up-down,rich,poor,tal,richTies};
+}
+
+/* ---------- Formats ---------- */
+const nf=new Intl.NumberFormat('fr-FR');
+function fmtC(c){
+  if(c>=100)return nf.format(Math.round(c));
+  if(c>=1)return nf.format(Math.round(c*10)/10);
+  return new Intl.NumberFormat('fr-FR',{maximumSignificantDigits:2}).format(c);
+}
+function pct(x){return Math.round(x*100)+' %'}
+function year(step){const y=step/2;return Number.isInteger(y)?String(y):nf.format(y)}
+
+/* ---------- État ---------- */
+let seed=Math.floor(Math.random()*9999)+1;
+let sim, selected=-1, playing=false, prog=1, last=0, flashes=[];
+const $=id=>document.getElementById(id);
+
+function reset(){
+  sim=createSim(P,seed);playing=false;prog=1;flashes=[];
+  $('seed').value=seed;$('play').textContent='▶ Lancer';
+  selected=stats(sim).tal;
+  refresh();
+}
+
+/* ---------- Dessin du monde ---------- */
+const wc=$('world'),wx=wc.getContext('2d');
+let scale=1,dpr=1;
+function sizeCanvases(){
+  dpr=window.devicePixelRatio||1;
+  const w=wc.parentElement.clientWidth;
+  wc.width=w*dpr;wc.height=w*dpr;wc.style.height=w+'px';
+  scale=w*dpr/W;
+  for(const id of ['scatter','bars']){
+    const c=$(id),cw=c.parentElement.clientWidth-20;
+    const h=id==='scatter'?Math.min(300,cw*0.75):Math.min(220,cw*0.55);
+    c.width=cw*dpr;c.height=h*dpr;c.style.height=h+'px';
+  }
+}
+function agentColor(k){
+  if(k>=4)return '#ffd76b';
+  if(k===3)return '#ffc94d';
+  if(k===2)return '#e8b24a';
+  if(k===1)return '#c9a35a';
+  if(k===0)return '#8a91b8';
+  if(k===-1)return '#5a6090';
+  if(k===-2)return '#454a75';
+  return '#353a5e';
+}
+function drawWorld(t){
+  const g=wx,S=scale;
+  g.fillStyle='#0a0d19';g.fillRect(0,0,wc.width,wc.height);
+  // grille légère
+  g.strokeStyle='rgba(255,255,255,.03)';g.lineWidth=1;
+  for(let i=0;i<=W;i+=20){g.beginPath();g.moveTo(i*S,0);g.lineTo(i*S,W*S);g.stroke();g.beginPath();g.moveTo(0,i*S);g.lineTo(W*S,i*S);g.stroke()}
+  // personnes
+  const base=Math.max(1.2*dpr,S*0.55);
+  for(const a of sim.ag){
+    const rad=a.k>0?base*(1+0.3*Math.min(a.k,7)):base*(a.k<0?0.85:1);
+    g.fillStyle=agentColor(a.k);
+    g.beginPath();g.arc((a.x+.5)*S,(a.y+.5)*S,rad,0,Math.PI*2);g.fill();
+  }
+  // éclairs de rencontre
+  for(const f of flashes){
+    const a=sim.ag[f.idx];
+    g.strokeStyle=(f.good?'rgba(61,220,151,':'rgba(255,93,115,')+f.life+')';
+    g.lineWidth=2*dpr;
+    g.beginPath();g.arc((a.x+.5)*S,(a.y+.5)*S,base*2+(1-f.life)*base*5,0,Math.PI*2);g.stroke();
+  }
+  // événements
+  const er=Math.max(1.5*dpr,S*0.7);
+  for(const e of sim.ev){
+    let x=e.x,y=e.y;
+    if(t<1&&Math.abs(e.x-e.px)<W/2&&Math.abs(e.y-e.py)<W/2){x=e.px+(e.x-e.px)*t;y=e.py+(e.y-e.py)*t}
+    g.fillStyle=e.good?'rgba(61,220,151,.18)':'rgba(255,93,115,.18)';
+    g.beginPath();g.arc(x*S,y*S,er*2.4,0,Math.PI*2);g.fill();
+    g.fillStyle=e.good?'#3ddc97':'#ff5d73';
+    g.beginPath();g.arc(x*S,y*S,er,0,Math.PI*2);g.fill();
+  }
+  // sélection
+  if(selected>=0&&sim.ag[selected]){
+    const a=sim.ag[selected];
+    g.strokeStyle='#fff';g.lineWidth=2*dpr;
+    g.beginPath();g.arc((a.x+.5)*S,(a.y+.5)*S,base*3.2,0,Math.PI*2);g.stroke();
+    g.strokeStyle='rgba(255,255,255,.35)';
+    g.beginPath();g.arc((a.x+.5)*S,(a.y+.5)*S,base*5,0,Math.PI*2);g.stroke();
+  }
+}
+
+/* ---------- Graphiques ---------- */
+function drawScatter(){
+  const c=$('scatter'),g=c.getContext('2d'),w=c.width,h=c.height;
+  g.clearRect(0,0,w,h);
+  const L=46*dpr,R=10*dpr,T=10*dpr,B=28*dpr;
+  let tmin=1,tmax=0,kmin=0,kmax=0;
+  for(const a of sim.ag){tmin=Math.min(tmin,a.T);tmax=Math.max(tmax,a.T);kmin=Math.min(kmin,a.k);kmax=Math.max(kmax,a.k)}
+  tmin=Math.max(0,tmin-0.03);tmax=Math.min(1,tmax+0.03);
+  if(tmax-tmin<0.1){const m=(tmax+tmin)/2;tmin=Math.max(0,m-0.1);tmax=Math.min(1,m+0.1)}
+  kmin=Math.min(kmin,-3)-0.5;kmax=Math.max(kmax,3)+0.5;
+  const X=v=>L+(v-tmin)/(tmax-tmin)*(w-L-R);
+  const Y=k=>T+(kmax-k)/(kmax-kmin)*(h-T-B);
+  g.font=(11*dpr)+'px Inter,sans-serif';g.fillStyle='#9aa1c2';g.textAlign='right';g.textBaseline='middle';
+  const kstep=(kmax-kmin)>14?2:1;
+  for(let k=Math.ceil(kmin);k<=kmax;k++){
+    if(k%kstep)continue;
+    g.strokeStyle=k===0?'rgba(255,255,255,.25)':'rgba(255,255,255,.06)';g.lineWidth=1;
+    g.beginPath();g.moveTo(L,Y(k));g.lineTo(w-R,Y(k));g.stroke();
+    g.fillText(fmtC(sim.p.C0*Math.pow(2,k)),L-6*dpr,Y(k));
+  }
+  g.textAlign='center';g.textBaseline='top';
+  const ts=(tmax-tmin)>0.4?0.1:0.05;
+  for(let v=Math.ceil(tmin/ts)*ts;v<=tmax+1e-9;v+=ts){g.fillText(nf.format(Math.round(v*100)/100),X(v),h-B+6*dpr)}
+  // points
+  for(let i=0;i<sim.ag.length;i++){
+    const a=sim.ag[i];
+    const j=((i*9301+49297)%233280)/233280-0.5;
+    g.fillStyle=agentColor(a.k);g.globalAlpha=0.85;
+    g.beginPath();g.arc(X(a.T),Y(a.k+j*0.5),2.2*dpr,0,Math.PI*2);g.fill();
+  }
+  g.globalAlpha=1;
+  if(selected>=0){const a=sim.ag[selected];g.strokeStyle='#fff';g.lineWidth=2*dpr;g.beginPath();g.arc(X(a.T),Y(a.k),6*dpr,0,Math.PI*2);g.stroke()}
+  g.fillStyle='#9aa1c2';g.textAlign='left';g.textBaseline='top';g.fillText('capital',4*dpr,0);
+  g.textAlign='right';g.textBaseline='bottom';g.fillText('talent →',w-R,h-B-2*dpr);
+}
+function drawBars(){
+  const c=$('bars'),g=c.getContext('2d'),w=c.width,h=c.height;
+  g.clearRect(0,0,w,h);
+  const cnt={};let kmin=0,kmax=0;
+  for(const a of sim.ag){cnt[a.k]=(cnt[a.k]||0)+1;kmin=Math.min(kmin,a.k);kmax=Math.max(kmax,a.k)}
+  kmin=Math.min(kmin,-2);kmax=Math.max(kmax,2);
+  const n=kmax-kmin+1,max=Math.max(...Object.values(cnt));
+  const L=6*dpr,R=6*dpr,T=16*dpr,B=24*dpr,bw=(w-L-R)/n;
+  g.font=(10*dpr)+'px Inter,sans-serif';g.textAlign='center';
+  const every=n>16?2:1;
+  for(let k=kmin;k<=kmax;k++){
+    const v=cnt[k]||0,x=L+(k-kmin)*bw,bh=(h-T-B)*v/max;
+    g.fillStyle=agentColor(k);
+    g.fillRect(x+bw*0.12,h-B-bh,bw*0.76,bh);
+    if(v){g.fillStyle='#eef0fa';g.textBaseline='bottom';g.fillText(v,x+bw/2,h-B-bh-2*dpr)}
+    if((k-kmin)%every===0){g.fillStyle='#9aa1c2';g.textBaseline='top';g.fillText(fmtC(sim.p.C0*Math.pow(2,k)),x+bw/2,h-B+6*dpr)}
+  }
+}
+
+/* ---------- Panneaux ---------- */
+function refresh(){
+  const st=stats(sim);
+  $('year').textContent='Année '+year(sim.step)+' / '+sim.p.years;
+  $('trackfill').style.width=(100*sim.step/sim.steps)+'%';
+  $('counters').textContent=nf.format(sim.cL)+' chances ('+nf.format(sim.cLc)+' saisies) · '+nf.format(sim.cB)+' coups durs';
+  $('sTop20').textContent=pct(st.top20);
+  $('sBot50').textContent=pct(st.bot50);
+  $('sUpDown').textContent=nf.format(st.up)+' / '+nf.format(st.down);
+  const r=sim.ag[st.rich];
+  $('sRich').textContent=fmtC(r.C);
+  $('sRichL').textContent='capital de la plus riche'+(st.richTies>1?' ('+st.richTies+' à égalité)':'')+' · talent '+nf.format(Math.round(r.T*100)/100)+', '+r.tr+'e sur '+nf.format(sim.ag.length);
+  const fresh=sim.step===0;
+  $('startHint').hidden=!fresh;
+  if(fresh){['sTop20','sBot50','sUpDown','sRich'].forEach(id=>$(id).textContent='?');$('sRichL').textContent='capital de la personne la plus riche';}
+  drawScatter();drawBars();renderFollow();
+}
+function renderFollow(){
+  const el=$('follow');
+  if(selected<0){el.innerHTML='<span class="muted">Touchez un point dans le monde.</span>';return}
+  const a=sim.ag[selected],n=sim.ag.length;
+  const C=sim.ag.map(x=>x.C).sort((x,y)=>y-x);
+  const wr=C.indexOf(a.C)+1;
+  const labels={L:['L','chance saisie'],M:['M','chance ratée'],B:['B','coup dur']};
+  let h='<div class="stats">'
+   +'<div class="stat"><div class="v">'+nf.format(Math.round(a.T*100)/100)+'</div><div class="l">talent · '+a.tr+'e sur '+nf.format(n)+'</div></div>'
+   +'<div class="stat"><div class="v">'+fmtC(a.C)+'</div><div class="l">capital · '+wr+'e sur '+nf.format(n)+'</div></div>'
+   +'</div>';
+  h+='<p class="small muted" style="margin:8px 0 0">Chances rencontrées : '+a.nL+' (saisies : '+a.nLc+') · coups durs : '+a.nB+'</p>';
+  if(a.hist.length){
+    h+='<div class="hist">'+a.hist.slice().reverse().map(e=>{
+      const t=labels[e[1]];
+      const eff=e[1]==='L'?'capital ×2':e[1]==='B'?'capital ÷2':'rien ne change';
+      return '<div><span class="small muted" style="min-width:64px">Année '+year(e[0])+'</span><span class="tag '+t[0]+'">'+t[1]+'</span><span class="small">'+eff+' → '+fmtC(e[2])+'</span></div>';
+    }).join('')+'</div>';
+  }else h+='<p class="small muted">Rien ne lui est encore arrivé.</p>';
+  el.innerHTML=h;
+}
+
+/* ---------- Animation ---------- */
+function frame(ts){
+  const dt=last?ts-last:16;last=ts;
+  const ms=+$('speed').value;
+  if(playing){
+    prog+=dt/ms;
+    let did=false;
+    while(prog>=1){
+      if(!stepSim(sim)){playing=false;$('play').textContent='▶ Lancer';prog=1;break}
+      prog-=1;did=true;
+      for(const h of sim.hits)flashes.push({idx:h.idx,good:h.good,life:1});
+    }
+    if(did)refresh();
+  }
+  for(const f of flashes)f.life-=dt/700;
+  flashes=flashes.filter(f=>f.life>0);
+  drawWorld(playing?Math.min(1,prog):1);
+  requestAnimationFrame(frame);
+}
+
+/* ---------- Commandes ---------- */
+$('play').onclick=()=>{
+  if(sim.step>=sim.steps){reset()}
+  playing=!playing;
+  if(playing&&prog>=1)prog=0.999;
+  $('play').textContent=playing?'❚❚ Pause':'▶ Reprendre';
+};
+$('stepBtn').onclick=()=>{playing=false;$('play').textContent='▶ Reprendre';if(stepSim(sim)){for(const h of sim.hits)flashes.push({idx:h.idx,good:h.good,life:1});prog=0}refresh()};
+$('finishBtn').onclick=()=>{playing=false;while(stepSim(sim));$('play').textContent='▶ Lancer';prog=1;refresh()};
+$('resetBtn').onclick=reset;
+$('dice').onclick=()=>{seed=Math.floor(Math.random()*9999)+1;reset()};
+$('seed').onchange=()=>{const v=parseInt($('seed').value,10);if(v>0){seed=v;reset()}};
+function pickAndShow(i){selected=i;refresh()}
+$('pickRich').onclick=()=>pickAndShow(stats(sim).rich);
+$('pickTal').onclick=()=>pickAndShow(stats(sim).tal);
+$('pickPoor').onclick=()=>pickAndShow(stats(sim).poor);
+$('pickRand').onclick=()=>pickAndShow(Math.floor(Math.random()*sim.ag.length));
+wc.addEventListener('click',ev=>{
+  const rect=wc.getBoundingClientRect();
+  const x=(ev.clientX-rect.left)/rect.width*W,y=(ev.clientY-rect.top)/rect.height*W;
+  let best=-1,bd=36;
+  sim.ag.forEach((a,i)=>{const d=(a.x+.5-x)**2+(a.y+.5-y)**2;if(d<bd){bd=d;best=i}});
+  if(best>=0){selected=best;refresh()}
+});
+
+/* ---------- Paramètres ---------- */
+const map={pN:'N',pmT:'mT',psT:'sT',pC0:'C0',pNE:'NE',ppL:'pL',pY:'years',pMv:'move',pRe:'reach'};
+function fillParams(){
+  for(const id in map)$(id).value=P[map[id]];
+  $('pLuck').checked=P.luckOn;$('pBad').checked=P.badOn;$('pSame').checked=P.sameTalent;
+  noteParams();
+}
+function noteParams(){
+  const diff=[];
+  for(const id in map)if(+$(id).value!==DEF[map[id]])diff.push(id);
+  if(!$('pLuck').checked)diff.push('l');if(!$('pBad').checked)diff.push('b');if($('pSame').checked)diff.push('s');
+  $('paramNote').textContent=diff.length===0?'Règles du papier.':diff.length+' règle(s) changée(s).';
+}
+document.querySelectorAll('#paramBox input').forEach(i=>i.addEventListener('input',noteParams));
+$('applyBtn').onclick=()=>{
+  for(const id in map){const v=parseFloat($(id).value);if(!isNaN(v))P[map[id]]=v}
+  P.N=Math.max(10,Math.min(5000,Math.round(P.N)));
+  P.mT=Math.max(0,Math.min(1,P.mT));P.sT=Math.max(0,P.sT);
+  P.pL=Math.max(0,Math.min(100,P.pL));P.years=Math.max(1,Math.round(P.years));
+  P.NE=Math.max(0,Math.round(P.NE));P.move=Math.max(0.1,P.move);P.reach=Math.max(0.5,Math.min(5,P.reach));P.C0=Math.max(0.01,P.C0);
+  P.luckOn=$('pLuck').checked;P.badOn=$('pBad').checked;P.sameTalent=$('pSame').checked;
+  fillParams();reset();$('batchRes').innerHTML='';$('batchFill').style.width='0';
+  window.scrollTo({top:0,behavior:'smooth'});
+};
+$('defBtn').onclick=()=>{P=Object.assign({},DEF);fillParams();reset();$('batchRes').innerHTML='';$('batchFill').style.width='0'};
+
+/* ---------- 100 mondes ---------- */
+$('batchBtn').onclick=async()=>{
+  const R=100,btn=$('batchBtn');btn.disabled=true;btn.textContent='Calcul…';
+  const tcat=[0,0,0,0];let t20=0,b50=0,richT=0,richTop10=0,talBelow=0,talAbove=0,up=0,down=0,richC=0;
+  for(let i=0;i<R;i++){
+    const s=createSim(P,seed*1000+i);while(stepSim(s));
+    const st=stats(s),n=s.ag.length;
+    t20+=st.top20;b50+=st.bot50;up+=st.up/n;down+=st.down/n;
+    const r=s.ag[st.rich];richT+=r.T;richC+=Math.log2(r.C/P.C0);
+    if(r.tr<=Math.ceil(n*0.1))richTop10++;
+    const tl=s.ag[st.tal];if(tl.k<0)talBelow++;if(tl.k>0)talAbove++;
+    {let above=0;for(const x of s.ag)if(x.C>tl.C)above++;tcat[tl.k<0?3:tl.k===0?2:above<n*0.1?0:1]++;}
+    if(i%4===3){$('batchFill').style.width=(100*(i+1)/R)+'%';await new Promise(r=>setTimeout(r,0))}
+  }
+  $('batchFill').style.width='100%';
+  const sameT=P.sameTalent;
+  $('batchRes').innerHTML=
+   '<div>Les 20 % les plus riches détiennent en moyenne <b>'+pct(t20/R)+'</b> du capital total. La moitié la plus pauvre : <b>'+pct(b50/R)+'</b>.</div>'
+  +'<div>En moyenne, <b>'+pct(up/R)+'</b> des gens finissent plus riches qu\'au départ et <b>'+pct(down/R)+'</b> plus pauvres.</div>'
+  +(sameT?'<div class="muted">Talent identique pour tous : les questions sur le talent n\'ont pas de sens ici.</div>':
+   '<div>Talent moyen de la personne la plus riche : <b>'+nf.format(Math.round(richT/R*100)/100)+'</b> (talent moyen de la population : '+nf.format(P.mT)+'). Elle faisait partie des 10 % les plus talentueux dans <b>'+richTop10+'</b> mondes sur 100.</div>'
+  +'<div>La personne la plus talentueuse a fini plus riche qu\'au départ dans <b>'+talAbove+'</b> mondes, plus pauvre dans <b>'+talBelow+'</b>, à égalité dans les autres.</div>')
+  +'<div class="small muted">Mondes n° '+seed*1000+' à '+(seed*1000+R-1)+', avec les règles actuelles. Relancer avec un autre numéro de monde donne d\'autres tirages.</div>';
+  showVerdict({top20:t20/R,tcat,richTop10,sameT});
+  btn.disabled=false;btn.textContent='Relancer 100 mondes';
+};
+
+/* ---------- Pari ---------- */
+const BETS=[
+ {q:'1. Au bout de 40 ans, quelle part du capital total détiennent les 20 % les plus riches ?',o:['Moins de 35 %','35 à 55 %','55 à 75 %','Plus de 75 %']},
+ {q:'2. Où finit le plus souvent la personne la plus talentueuse ?',o:['Parmi les 10 % les plus riches','Plus riche qu\'au départ, sans plus','Au même niveau qu\'au départ','Plus pauvre qu\'au départ']},
+ {q:'3. La personne la plus riche fait-elle partie des 10 % les plus talentueux ?',o:['Presque toujours (plus de 75 % des mondes)','Souvent (50 à 75 %)','Parfois (25 à 50 %)','Rarement (moins de 25 %)']}
+];
+let bet=[null,null,null];
+try{const v=JSON.parse(localStorage.getItem('tvl-bet')||'null');if(Array.isArray(v)&&v.length===3)bet=v}catch(e){}
+function renderBets(){
+  $('bets').innerHTML=BETS.map((b,i)=>'<div class="bet" role="radiogroup" aria-label="Question '+(i+1)+'"><p class="q">'+b.q+'</p>'
+    +b.o.map((o,j)=>'<label class="opt" id="opt'+i+'_'+j+'"><input type="radio" name="bet'+i+'" id="bet'+i+'_'+j+'" value="'+j+'"'+(bet[i]===j?' checked':'')+'> <span>'+o+'</span></label>').join('')
+    +'<div class="verdict" id="verd'+i+'" hidden></div></div>').join('');
+  document.querySelectorAll('#bets input').forEach(inp=>inp.addEventListener('change',()=>{
+    const i=+inp.name.slice(3);bet[i]=+inp.value;
+    try{localStorage.setItem('tvl-bet',JSON.stringify(bet))}catch(e){}
+    noteBet();
+  }));
+  noteBet();
+}
+function noteBet(){const n=bet.filter(x=>x!==null).length;$('betNote').textContent=n<3?n+' / 3 réponses':'Pari prêt.'}
+function showVerdict(r){
+  const pctS=x=>Math.round(x*100)+' %';
+  const a1=r.top20<.35?0:r.top20<.55?1:r.top20<.75?2:3;
+  let a2=0;for(let j=1;j<4;j++)if(r.tcat[j]>r.tcat[a2])a2=j;
+  const f=r.richTop10/100,a3=f>.75?0:f>=.5?1:f>=.25?2:3;
+  const truth=[a1,r.sameT?null:a2,r.sameT?null:a3];
+  const detail=[
+    'Résultat : '+pctS(r.top20)+' en moyenne sur 100 mondes.',
+    'Résultat sur 100 mondes : parmi les 10 % les plus riches '+r.tcat[0]+' fois, plus riche sans plus '+r.tcat[1]+' fois, au même niveau '+r.tcat[2]+' fois, plus pauvre '+r.tcat[3]+' fois.',
+    'Résultat : dans '+r.richTop10+' mondes sur 100.'
+  ];
+  $('betWarn').hidden=false;
+  let score=0,answered=0;
+  for(let i=0;i<3;i++){
+    document.querySelectorAll('#bets .opt').forEach(el=>{if(el.id.startsWith('opt'+i+'_'))el.classList.toggle('truth',el.id==='opt'+i+'_'+truth[i])});
+    const v=$('verd'+i);v.hidden=false;
+    if(truth[i]===null){v.innerHTML='<span class="muted">Sans objet : tout le monde a le même talent.</span>';continue}
+    let head='';
+    if(bet[i]===null)head='<span class="muted">Pas de pari. </span>';
+    else{answered++;if(bet[i]===truth[i]){score++;head='<span class="ok">Bien vu. </span>'}else head='<span class="ko">Raté. </span>'}
+    v.innerHTML=head+detail[i];
+  }
+  $('betNote').textContent=answered?'Score : '+score+' / '+answered+' (règles actuelles). La bonne case est en vert.':'Résultats affichés. La bonne case est en vert.';
+}
+$('checkBet').onclick=()=>{
+  $('batchBtn').scrollIntoView({behavior:'smooth',block:'center'});
+  if(!$('batchBtn').disabled)$('batchBtn').click();
+  setTimeout(()=>$('pari').scrollIntoView({behavior:'smooth',block:'start'}),100);
+};
+renderBets();
+
+/* ---------- Onglets ---------- */
+function showTab(which){
+  const sim=which!=='src';
+  $('tabSim').hidden=!sim;$('tabSrc').hidden=sim;
+  $('tabBtnSim').setAttribute('aria-selected',String(sim));$('tabBtnSrc').setAttribute('aria-selected',String(!sim));
+  if(sim){sizeCanvases();refresh()}
+}
+$('tabBtnSim').onclick=()=>showTab('sim');
+$('tabBtnSrc').onclick=()=>showTab('src');
+
+/* ---------- Démarrage ---------- */
+window.addEventListener('resize',()=>{sizeCanvases();refresh()});
+fillParams();sizeCanvases();reset();requestAnimationFrame(frame);
+if(location.hash==='#chiffres')showTab('src');
+})();
+</script>
+
+</body>
+</html>
